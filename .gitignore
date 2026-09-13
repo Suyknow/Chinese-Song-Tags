@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Generated state / logs — never commit these
+seen_ids.json
+*.log
