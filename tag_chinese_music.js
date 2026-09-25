@@ -337,14 +337,23 @@ function run(argv) {
     }
   }
 
-  var newTracks = 0, matched = 0, changed = 0, skipped = 0, failed = 0, retried = 0;
+  var newTracks = 0, rechecked = 0, matched = 0, changed = 0, skipped = 0, failed = 0, retried = 0;
   var touched = [];
 
   for (var k = 0; k < scanned; k++) {
     var id = srcIds[k];
-    if (!id || seen[id]) continue;          // already classified
-    if (limit && newTracks >= limit) break;
-    newTracks++;
+    if (!id) continue;
+    var isNew = !seen[id];
+    // In the recent-window pass, re-evaluate already-seen tracks too: a track
+    // first seen before its (cloud) metadata finished loading would otherwise
+    // stay classified as "not Chinese" forever.
+    if (!usedRecent && !isNew) continue;
+    if (isNew) {
+      if (limit && newTracks >= limit) break;
+      newTracks++;
+    } else {
+      rechecked++;
+    }
 
     var nm3 = srcNames[k] || '', ar3 = srcArtists[k] || '';
     var isHit = isChineseTrack(nm3, ar3, srcAlbums[k] || '');
@@ -415,6 +424,7 @@ function run(argv) {
               (needFull ? ' (full pass)' : ' (date filter unavailable)'))));
   console.log('Scanned        : ' + scanned + ' track(s)');
   console.log('New inspected  : ' + newTracks + (limit ? ' (limit ' + limit + ')' : ''));
+  if (rechecked) console.log('Re-checked     : ' + rechecked + ' (seen, re-evaluated)');
   console.log('Matched        : ' + matched);
   console.log('Changed        : ' + changed);
   console.log('Skipped        : ' + skipped + ' (already tagged)');

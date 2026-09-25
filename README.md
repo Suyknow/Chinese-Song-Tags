@@ -50,7 +50,9 @@ Music library ──► tag_chinese_music.js ──► writes Grouping = "Chines
 - **Incremental**: a state file remembers the `persistentID` of every track it
   has already classified, so repeat runs only look at **tracks added in the
   last `since` days** (default 30). Adding a Chinese song therefore tags it in
-  seconds without rescanning the whole library.
+  seconds without rescanning the whole library. Tracks in that window are
+  re-checked on every run, so a song whose (cloud) metadata finishes loading
+  after it was added still gets tagged.
 - **Idempotent**: the tag is appended once; running again changes nothing.
 
 ## Requirements
@@ -190,6 +192,9 @@ osascript -l JavaScript tag_chinese_music.js apply clear=1
   - The `JP_ONLY` kanji list is curated, not exhaustive.
 - `clear=1` removes the tag as a substring; if your own `Grouping` value embeds
   the tag inside a longer word it will be rewritten.
+- Within the `since` window, tracks are re-checked every run, so manually
+  removing the tag from a **recently added** song may cause a later run to add
+  it back.
 - Only the local library is processed; streaming-only items are ignored.
 
 ## Files
